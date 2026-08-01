@@ -51,7 +51,6 @@ log/
 
 ### Backups / dumps ###
 *.dump
-*.sql
 *.bak
 *.backup
 backup/
@@ -65,3 +64,6 @@ storage/
 ### Sistema operacional ###
 .DS_Store
 Thumbs.db
+
+### Permitir migrations Flyway ###
+!src/main/resources/db/migration/*.sql
