@@ -1,0 +1,67 @@
+HELP.md
+target/
+
+.mvn/wrapper/maven-wrapper.jar
+
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Segurança / ambiente ###
+.env
+.env.*
+!.env.example
+
+application-local.yml
+application-prod-local.yml
+application-dev-local.yml
+
+### Logs ###
+*.log
+logs/
+log/
+
+### Backups / dumps ###
+*.dump
+*.sql
+*.bak
+*.backup
+backup/
+backups/
+
+### Uploads locais ###
+uploads/
+files/
+storage/
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
