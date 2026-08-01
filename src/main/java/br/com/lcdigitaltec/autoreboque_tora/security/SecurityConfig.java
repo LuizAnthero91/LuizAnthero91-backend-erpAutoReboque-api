@@ -1,7 +1,5 @@
-package br.com.lcdigitaltec.autoreboque_tora.config;
+package br.com.lcdigitaltec.autoreboque_tora.security;
 
-import br.com.lcdigitaltec.autoreboque_tora.security.CustomUserDetailsService;
-import br.com.lcdigitaltec.autoreboque_tora.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
