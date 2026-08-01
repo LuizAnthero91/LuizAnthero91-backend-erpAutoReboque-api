@@ -1,4 +1,4 @@
-package br.com.lcdigitaltec.autoreboque_tora.auth;
+package br.com.lcdigitaltec.autoreboque_tora.security;
 
 import br.com.lcdigitaltec.autoreboque_tora.security.JwtService;
 import br.com.lcdigitaltec.autoreboque_tora.usuario.Usuario;

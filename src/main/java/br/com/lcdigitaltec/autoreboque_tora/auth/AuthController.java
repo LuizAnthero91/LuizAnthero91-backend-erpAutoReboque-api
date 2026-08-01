@@ -1,4 +1,4 @@
-package br.com.lcdigitaltec.autoreboque_tora.auth;
+package br.com.lcdigitaltec.autoreboque_tora.security;
 
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;

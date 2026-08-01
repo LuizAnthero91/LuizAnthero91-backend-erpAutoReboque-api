@@ -1,4 +1,4 @@
-package br.com.lcdigitaltec.autoreboque_tora.auth;
+package br.com.lcdigitaltec.autoreboque_tora.security;
 
 public record LoginResponse(
         String token,
