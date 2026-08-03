@@ -9,22 +9,38 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ordens_servico")
+@Table(
+        name = "ordens_servico",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_ordens_servico_numero_os",
+                        columnNames = "numero_os"
+                )
+        }
+)
 public class OrdemServico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @Column(
+            name = "numero_os",
+            nullable = false,
+            unique = true,
+            updatable = false
+    )
+    private Long numeroOs;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "motorista_id")
     private Motorista motorista;
 
@@ -47,10 +63,20 @@ public class OrdemServico {
     @Column(name = "km_real")
     private BigDecimal kmReal;
 
-    @Column(name = "valor_cobrado", nullable = false)
+    @Column(
+            name = "valor_cobrado",
+            nullable = false,
+            precision = 12,
+            scale = 2
+    )
     private BigDecimal valorCobrado = BigDecimal.ZERO;
 
-    @Column(name = "custo_estimado", nullable = false)
+    @Column(
+            name = "custo_estimado",
+            nullable = false,
+            precision = 12,
+            scale = 2
+    )
     private BigDecimal custoEstimado = BigDecimal.ZERO;
 
     @Column(name = "data_abertura", nullable = false)
@@ -59,12 +85,14 @@ public class OrdemServico {
     @Column(name = "data_conclusao")
     private LocalDateTime dataConclusao;
 
+    @Column(columnDefinition = "TEXT")
     private String observacao;
 
     protected OrdemServico() {
     }
 
     public OrdemServico(
+            Long numeroOs,
             Cliente cliente,
             Veiculo veiculo,
             Motorista motorista,
@@ -76,6 +104,13 @@ public class OrdemServico {
             BigDecimal custoEstimado,
             String observacao
     ) {
+        if (numeroOs == null) {
+            throw new IllegalArgumentException(
+                    "O número da ordem de serviço é obrigatório."
+            );
+        }
+
+        this.numeroOs = numeroOs;
         this.cliente = cliente;
         this.veiculo = veiculo;
         this.motorista = motorista;
@@ -84,13 +119,21 @@ public class OrdemServico {
         this.origem = origem;
         this.destino = destino;
         this.kmEstimado = kmEstimado;
-        this.valorCobrado = valorCobrado == null ? BigDecimal.ZERO : valorCobrado;
-        this.custoEstimado = custoEstimado == null ? BigDecimal.ZERO : custoEstimado;
+        this.valorCobrado = valorCobrado == null
+                ? BigDecimal.ZERO
+                : valorCobrado;
+        this.custoEstimado = custoEstimado == null
+                ? BigDecimal.ZERO
+                : custoEstimado;
         this.observacao = observacao;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public Long getNumeroOs() {
+        return numeroOs;
     }
 
     public Cliente getCliente() {
@@ -172,8 +215,12 @@ public class OrdemServico {
         this.destino = destino;
         this.kmEstimado = kmEstimado;
         this.kmReal = kmReal;
-        this.valorCobrado = valorCobrado == null ? BigDecimal.ZERO : valorCobrado;
-        this.custoEstimado = custoEstimado == null ? BigDecimal.ZERO : custoEstimado;
+        this.valorCobrado = valorCobrado == null
+                ? BigDecimal.ZERO
+                : valorCobrado;
+        this.custoEstimado = custoEstimado == null
+                ? BigDecimal.ZERO
+                : custoEstimado;
         this.observacao = observacao;
     }
 

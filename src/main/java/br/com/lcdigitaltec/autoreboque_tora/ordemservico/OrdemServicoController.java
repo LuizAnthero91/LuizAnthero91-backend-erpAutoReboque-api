@@ -26,6 +26,13 @@ public class OrdemServicoController {
         return ordemServicoService.buscarPorId(id);
     }
 
+    @GetMapping("/numero/{numeroOs}")
+    public OrdemServicoResponse buscarPorNumero(
+            @PathVariable Long numeroOs
+    ) {
+        return ordemServicoService.buscarPorNumero(numeroOs);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrdemServicoResponse cadastrar(@RequestBody @Valid OrdemServicoRequest request) {

@@ -23,19 +23,22 @@ public class OrdemServicoService {
     private final VeiculoRepository veiculoRepository;
     private final MotoristaRepository motoristaRepository;
     private final LancamentoFinanceiroService lancamentoFinanceiroService;
+    private final NumeroOrdemServicoService numeroOrdemServicoService;
 
     public OrdemServicoService(
             OrdemServicoRepository ordemServicoRepository,
             ClienteRepository clienteRepository,
             VeiculoRepository veiculoRepository,
             MotoristaRepository motoristaRepository,
-            LancamentoFinanceiroService lancamentoFinanceiroService
+            LancamentoFinanceiroService lancamentoFinanceiroService,
+            NumeroOrdemServicoService numeroOrdemServicoService
     ) {
         this.ordemServicoRepository = ordemServicoRepository;
         this.clienteRepository = clienteRepository;
         this.veiculoRepository = veiculoRepository;
         this.motoristaRepository = motoristaRepository;
         this.lancamentoFinanceiroService = lancamentoFinanceiroService;
+        this.numeroOrdemServicoService = numeroOrdemServicoService;
     }
 
     @Transactional(readOnly = true)
@@ -52,13 +55,29 @@ public class OrdemServicoService {
         return new OrdemServicoResponse(ordem);
     }
 
+    @Transactional(readOnly = true)
+    public OrdemServicoResponse buscarPorNumero(Long numeroOs) {
+        OrdemServico ordem = ordemServicoRepository
+                .findByNumeroOs(numeroOs)
+                .orElseThrow(() ->
+                        new RecursoNaoEncontradoException(
+                                "Ordem de serviço não encontrada."
+                        )
+                );
+
+        return new OrdemServicoResponse(ordem);
+    }
+
     @Transactional
     public OrdemServicoResponse cadastrar(OrdemServicoRequest request) {
         Cliente cliente = buscarCliente(request.clienteId());
         Veiculo veiculo = buscarVeiculoOpcional(request.veiculoId());
         Motorista motorista = buscarMotoristaOpcional(request.motoristaId());
 
+        Long numeroOs = numeroOrdemServicoService.gerarProximoNumero();
+
         OrdemServico ordem = new OrdemServico(
+                numeroOs,
                 cliente,
                 veiculo,
                 motorista,
