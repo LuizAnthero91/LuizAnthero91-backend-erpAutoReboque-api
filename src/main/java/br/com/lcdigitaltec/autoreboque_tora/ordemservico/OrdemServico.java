@@ -32,10 +32,23 @@ public class OrdemServico {
     )
     private Long numeroOs;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", nullable = false)
+    /*
+     * Cliente contratante do serviço.
+     */
+    @ManyToOne(
+            optional = false,
+            fetch = FetchType.LAZY
+    )
+    @JoinColumn(
+            name = "cliente_id",
+            nullable = false
+    )
     private Cliente cliente;
 
+    /*
+     * Veículo da frota da empresa utilizado no atendimento.
+     * Exemplo: o guincho responsável pela remoção.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "veiculo_id")
     private Veiculo veiculo;
@@ -45,22 +58,45 @@ public class OrdemServico {
     private Motorista motorista;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_servico", nullable = false)
+    @Column(
+            name = "tipo_servico",
+            nullable = false,
+            length = 80
+    )
     private TipoServico tipoServico;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(
+            nullable = false,
+            length = 50
+    )
     private StatusOrdemServico status;
 
-    @Column(nullable = false)
+    @Column(
+            nullable = false,
+            columnDefinition = "TEXT"
+    )
     private String origem;
 
+    @Column(columnDefinition = "TEXT")
     private String destino;
 
-    @Column(name = "km_estimado")
+    /*
+     * Dados internos da operação.
+     * Esses campos não precisam aparecer no PDF entregue ao cliente.
+     */
+    @Column(
+            name = "km_estimado",
+            precision = 12,
+            scale = 2
+    )
     private BigDecimal kmEstimado;
 
-    @Column(name = "km_real")
+    @Column(
+            name = "km_real",
+            precision = 12,
+            scale = 2
+    )
     private BigDecimal kmReal;
 
     @Column(
@@ -79,7 +115,10 @@ public class OrdemServico {
     )
     private BigDecimal custoEstimado = BigDecimal.ZERO;
 
-    @Column(name = "data_abertura", nullable = false)
+    @Column(
+            name = "data_abertura",
+            nullable = false
+    )
     private LocalDateTime dataAbertura = LocalDateTime.now();
 
     @Column(name = "data_conclusao")
@@ -87,6 +126,51 @@ public class OrdemServico {
 
     @Column(columnDefinition = "TEXT")
     private String observacao;
+
+    /*
+     * Veículo pertencente ao cliente e atendido pela empresa.
+     * Não deve ser confundido com o campo "veiculo", que representa
+     * o guincho ou outro veículo da frota da empresa.
+     */
+    @Column(
+            name = "veiculo_cliente_placa",
+            length = 10
+    )
+    private String veiculoClientePlaca;
+
+    @Column(
+            name = "veiculo_cliente_marca",
+            length = 80
+    )
+    private String veiculoClienteMarca;
+
+    @Column(
+            name = "veiculo_cliente_modelo",
+            length = 100
+    )
+    private String veiculoClienteModelo;
+
+    @Column(
+            name = "veiculo_cliente_cor",
+            length = 50
+    )
+    private String veiculoClienteCor;
+
+    @Column(name = "veiculo_cliente_ano")
+    private Integer veiculoClienteAno;
+
+    @Column(
+            name = "veiculo_cliente_km",
+            precision = 12,
+            scale = 2
+    )
+    private BigDecimal veiculoClienteKm;
+
+    @Column(
+            name = "veiculo_cliente_observacao",
+            columnDefinition = "TEXT"
+    )
+    private String veiculoClienteObservacao;
 
     protected OrdemServico() {
     }
@@ -102,13 +186,19 @@ public class OrdemServico {
             BigDecimal kmEstimado,
             BigDecimal valorCobrado,
             BigDecimal custoEstimado,
-            String observacao
+            String observacao,
+            String veiculoClientePlaca,
+            String veiculoClienteMarca,
+            String veiculoClienteModelo,
+            String veiculoClienteCor,
+            Integer veiculoClienteAno,
+            BigDecimal veiculoClienteKm,
+            String veiculoClienteObservacao
     ) {
-        if (numeroOs == null) {
-            throw new IllegalArgumentException(
-                    "O número da ordem de serviço é obrigatório."
-            );
-        }
+        validarNumeroOs(numeroOs);
+        validarCliente(cliente);
+        validarTipoServico(tipoServico);
+        validarOrigem(origem);
 
         this.numeroOs = numeroOs;
         this.cliente = cliente;
@@ -119,13 +209,26 @@ public class OrdemServico {
         this.origem = origem;
         this.destino = destino;
         this.kmEstimado = kmEstimado;
+
         this.valorCobrado = valorCobrado == null
                 ? BigDecimal.ZERO
                 : valorCobrado;
+
         this.custoEstimado = custoEstimado == null
                 ? BigDecimal.ZERO
                 : custoEstimado;
+
         this.observacao = observacao;
+
+        atualizarDadosVeiculoCliente(
+                veiculoClientePlaca,
+                veiculoClienteMarca,
+                veiculoClienteModelo,
+                veiculoClienteCor,
+                veiculoClienteAno,
+                veiculoClienteKm,
+                veiculoClienteObservacao
+        );
     }
 
     public Long getId() {
@@ -192,6 +295,34 @@ public class OrdemServico {
         return observacao;
     }
 
+    public String getVeiculoClientePlaca() {
+        return veiculoClientePlaca;
+    }
+
+    public String getVeiculoClienteMarca() {
+        return veiculoClienteMarca;
+    }
+
+    public String getVeiculoClienteModelo() {
+        return veiculoClienteModelo;
+    }
+
+    public String getVeiculoClienteCor() {
+        return veiculoClienteCor;
+    }
+
+    public Integer getVeiculoClienteAno() {
+        return veiculoClienteAno;
+    }
+
+    public BigDecimal getVeiculoClienteKm() {
+        return veiculoClienteKm;
+    }
+
+    public String getVeiculoClienteObservacao() {
+        return veiculoClienteObservacao;
+    }
+
     public void atualizar(
             Cliente cliente,
             Veiculo veiculo,
@@ -204,24 +335,52 @@ public class OrdemServico {
             BigDecimal kmReal,
             BigDecimal valorCobrado,
             BigDecimal custoEstimado,
-            String observacao
+            String observacao,
+            String veiculoClientePlaca,
+            String veiculoClienteMarca,
+            String veiculoClienteModelo,
+            String veiculoClienteCor,
+            Integer veiculoClienteAno,
+            BigDecimal veiculoClienteKm,
+            String veiculoClienteObservacao
     ) {
+        validarCliente(cliente);
+        validarTipoServico(tipoServico);
+        validarOrigem(origem);
+
         this.cliente = cliente;
         this.veiculo = veiculo;
         this.motorista = motorista;
         this.tipoServico = tipoServico;
-        this.status = status;
+
+        if (status != null) {
+            this.status = status;
+        }
+
         this.origem = origem;
         this.destino = destino;
         this.kmEstimado = kmEstimado;
         this.kmReal = kmReal;
+
         this.valorCobrado = valorCobrado == null
                 ? BigDecimal.ZERO
                 : valorCobrado;
+
         this.custoEstimado = custoEstimado == null
                 ? BigDecimal.ZERO
                 : custoEstimado;
+
         this.observacao = observacao;
+
+        atualizarDadosVeiculoCliente(
+                veiculoClientePlaca,
+                veiculoClienteMarca,
+                veiculoClienteModelo,
+                veiculoClienteCor,
+                veiculoClienteAno,
+                veiculoClienteKm,
+                veiculoClienteObservacao
+        );
     }
 
     public void iniciarAtendimento() {
@@ -240,5 +399,71 @@ public class OrdemServico {
 
     public void cancelar() {
         this.status = StatusOrdemServico.CANCELADA;
+    }
+
+    private void atualizarDadosVeiculoCliente(
+            String placa,
+            String marca,
+            String modelo,
+            String cor,
+            Integer ano,
+            BigDecimal km,
+            String observacao
+    ) {
+        this.veiculoClientePlaca = normalizarTextoMaiusculo(placa);
+        this.veiculoClienteMarca = normalizarTexto(marca);
+        this.veiculoClienteModelo = normalizarTexto(modelo);
+        this.veiculoClienteCor = normalizarTexto(cor);
+        this.veiculoClienteAno = ano;
+        this.veiculoClienteKm = km;
+        this.veiculoClienteObservacao = normalizarTexto(observacao);
+    }
+
+    private void validarNumeroOs(Long numeroOs) {
+        if (numeroOs == null) {
+            throw new IllegalArgumentException(
+                    "O número da ordem de serviço é obrigatório."
+            );
+        }
+    }
+
+    private void validarCliente(Cliente cliente) {
+        if (cliente == null) {
+            throw new IllegalArgumentException(
+                    "O cliente da ordem de serviço é obrigatório."
+            );
+        }
+    }
+
+    private void validarTipoServico(TipoServico tipoServico) {
+        if (tipoServico == null) {
+            throw new IllegalArgumentException(
+                    "O tipo de serviço é obrigatório."
+            );
+        }
+    }
+
+    private void validarOrigem(String origem) {
+        if (origem == null || origem.isBlank()) {
+            throw new IllegalArgumentException(
+                    "A origem do atendimento é obrigatória."
+            );
+        }
+    }
+
+    private String normalizarTexto(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+
+        return valor.trim();
+    }
+
+    private String normalizarTextoMaiusculo(String valor) {
+        String texto = normalizarTexto(valor);
+
+        return texto == null
+                ? null
+                : texto.toUpperCase();
     }
 }

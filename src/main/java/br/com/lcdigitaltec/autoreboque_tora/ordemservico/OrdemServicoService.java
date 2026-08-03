@@ -87,7 +87,15 @@ public class OrdemServicoService {
                 request.kmEstimado(),
                 request.valorCobrado(),
                 request.custoEstimado(),
-                request.observacao()
+                request.observacao(),
+
+                request.veiculoClientePlaca(),
+                request.veiculoClienteMarca(),
+                request.veiculoClienteModelo(),
+                request.veiculoClienteCor(),
+                request.veiculoClienteAno(),
+                request.veiculoClienteKm(),
+                request.veiculoClienteObservacao()
         );
 
         OrdemServico salva = ordemServicoRepository.save(ordem);
@@ -127,7 +135,15 @@ public class OrdemServicoService {
                 request.kmReal(),
                 request.valorCobrado(),
                 request.custoEstimado(),
-                request.observacao()
+                request.observacao(),
+
+                request.veiculoClientePlaca(),
+                request.veiculoClienteMarca(),
+                request.veiculoClienteModelo(),
+                request.veiculoClienteCor(),
+                request.veiculoClienteAno(),
+                request.veiculoClienteKm(),
+                request.veiculoClienteObservacao()
         );
 
         return new OrdemServicoResponse(ordem);
