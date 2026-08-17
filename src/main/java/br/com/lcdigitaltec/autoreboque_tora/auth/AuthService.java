@@ -78,7 +78,12 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getPerfil().getNome()
+                usuario.getPerfil().getNome(),
+                usuario.getAuthorities()
+                        .stream()
+                        .map(authority -> authority.getAuthority())
+                        .sorted()
+                        .toList()
         );
     }
 }
