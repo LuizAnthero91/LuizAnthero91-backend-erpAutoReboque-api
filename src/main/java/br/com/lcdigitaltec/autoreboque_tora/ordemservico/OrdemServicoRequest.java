@@ -93,19 +93,19 @@ public record OrdemServicoRequest(
         String veiculoClientePlaca,
 
         @Size(
-                max = 50,
+                max = 10,
                 message = "A marca do veículo deve ter no máximo 50 caracteres"
         )
         String veiculoClienteMarca,
 
         @Size(
-                max = 80,
+                max = 15,
                 message = "O modelo do veículo deve ter no máximo 80 caracteres"
         )
         String veiculoClienteModelo,
 
         @Size(
-                max = 30,
+                max = 15,
                 message = "A cor do veículo deve ter no máximo 30 caracteres"
         )
         String veiculoClienteCor,

@@ -1,32 +1,37 @@
 package br.com.lcdigitaltec.autoreboque_tora.security;
 
-import br.com.lcdigitaltec.autoreboque_tora.usuario.Usuario;
-import br.com.lcdigitaltec.autoreboque_tora.usuario.UsuarioRepository;
-import org.springframework.security.core.userdetails.User;
+import br.com.lcdigitaltec.autoreboque_tora.domain.usuario.UsuarioRepository;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService
+        implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
-    public CustomUserDetailsService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public CustomUserDetailsService(
+            UsuarioRepository usuarioRepository
+    ) {
+        this.usuarioRepository =
+                usuarioRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+    public UserDetails loadUserByUsername(
+            String email
+    ) throws UsernameNotFoundException {
 
-        return User.builder()
-                .username(usuario.getEmail())
-                .password(usuario.getSenhaHash())
-                .authorities("ROLE_" + usuario.getPerfil().name())
-                .disabled(!usuario.getAtivo())
-                .build();
+        return usuarioRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () ->
+                                new UsernameNotFoundException(
+                                        "Usuário não encontrado"
+                                )
+                );
     }
 }
