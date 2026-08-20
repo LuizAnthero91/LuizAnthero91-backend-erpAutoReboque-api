@@ -1,11 +1,15 @@
 package br.com.lcdigitaltec.autoreboque_tora.ordemservico;
 
+import br.com.lcdigitaltec.autoreboque_tora.shared.pagination.PaginaResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/ordens-servico")
@@ -19,9 +23,17 @@ public class OrdemServicoController {
 
     @PreAuthorize("hasAuthority('OS_VISUALIZAR')")
     @GetMapping
-    public List<OrdemServicoResponse> listarTodos() {
-        return ordemServicoService.listarTodos();
+    public PaginaResponse<OrdemServicoResponse> listarTodos(
+            @PageableDefault(
+                    size = 10,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            )
+            Pageable pageable
+    ) {
+        return ordemServicoService.listarTodos(pageable);
     }
+
 
 
     @PreAuthorize("hasAuthority('OS_VISUALIZAR')")
