@@ -24,9 +24,7 @@ public class JwtService {
     @Value("${jwt.expiration-ms}")
     private Long expirationMs;
 
-    // =====================================================
-    // GERAR TOKEN
-    // =====================================================
+
 
     public String gerarToken(
             UserDetails userDetails,
@@ -57,9 +55,7 @@ public class JwtService {
                 .compact();
     }
 
-    // =====================================================
-    // EXTRAIR E-MAIL
-    // =====================================================
+
 
     public String extrairEmail(
             String token
@@ -69,9 +65,7 @@ public class JwtService {
                 .getSubject();
     }
 
-    // =====================================================
-    // VALIDAR TOKEN
-    // =====================================================
+
 
     public boolean tokenValido(
             String token,
@@ -83,12 +77,12 @@ public class JwtService {
 
         return email.equals(
                 userDetails.getUsername()
-        ) && !tokenExpirado(token);
+        )
+                && userDetails.isEnabled()
+                && !tokenExpirado(token);
     }
 
-    // =====================================================
-    // VERIFICAR EXPIRAÇÃO
-    // =====================================================
+
 
     private boolean tokenExpirado(
             String token
@@ -101,9 +95,7 @@ public class JwtService {
                 );
     }
 
-    // =====================================================
-    // EXTRAIR CLAIMS
-    // =====================================================
+
 
     private Claims extrairClaims(
             String token
@@ -118,9 +110,7 @@ public class JwtService {
                 .getPayload();
     }
 
-    // =====================================================
-    // CHAVE DE ASSINATURA
-    // =====================================================
+
 
     private SecretKey getSigningKey() {
 
