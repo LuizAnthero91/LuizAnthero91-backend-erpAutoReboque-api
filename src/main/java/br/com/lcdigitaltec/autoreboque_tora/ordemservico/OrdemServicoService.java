@@ -7,10 +7,14 @@ import br.com.lcdigitaltec.autoreboque_tora.common.exception.RegraNegocioExcepti
 import br.com.lcdigitaltec.autoreboque_tora.financeiro.LancamentoFinanceiroService;
 import br.com.lcdigitaltec.autoreboque_tora.motorista.Motorista;
 import br.com.lcdigitaltec.autoreboque_tora.motorista.MotoristaRepository;
+import br.com.lcdigitaltec.autoreboque_tora.shared.pagination.PaginaResponse;
 import br.com.lcdigitaltec.autoreboque_tora.veiculo.Veiculo;
 import br.com.lcdigitaltec.autoreboque_tora.veiculo.VeiculoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import br.com.lcdigitaltec.autoreboque_tora.shared.pagination.PaginaResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -42,11 +46,15 @@ public class OrdemServicoService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrdemServicoResponse> listarTodos() {
-        return ordemServicoRepository.findAll()
-                .stream()
-                .map(OrdemServicoResponse::new)
-                .toList();
+    public PaginaResponse<OrdemServicoResponse> listarTodos(Pageable pageable) {
+
+        Page<OrdemServicoResponse> pagina =
+                ordemServicoRepository
+                        .findALLComRelacionamentos(pageable)
+                        .map(OrdemServicoResponse::new);
+        return PaginaResponse.from(pagina);
+
+
     }
 
     @Transactional(readOnly = true)
