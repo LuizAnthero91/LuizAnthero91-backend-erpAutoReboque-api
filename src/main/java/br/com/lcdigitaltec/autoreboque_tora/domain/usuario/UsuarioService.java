@@ -31,9 +31,7 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // =====================================================
-    // CADASTRAR
-    // =====================================================
+
 
     @Transactional
     public DadosDetalhamentoUsuario cadastrar(
@@ -67,9 +65,6 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // LISTAR
-    // =====================================================
 
     @Transactional(readOnly = true)
     public List<DadosDetalhamentoUsuario> listar() {
@@ -81,9 +76,6 @@ public class UsuarioService {
                 .toList();
     }
 
-    // =====================================================
-    // DETALHAR
-    // =====================================================
 
     @Transactional(readOnly = true)
     public DadosDetalhamentoUsuario detalhar(
@@ -97,9 +89,7 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // ATUALIZAR
-    // =====================================================
+
 
     @Transactional
     public DadosDetalhamentoUsuario atualizar(
@@ -139,9 +129,7 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // DESATIVAR
-    // =====================================================
+
 
     @Transactional
     public void desativar(
@@ -153,9 +141,7 @@ public class UsuarioService {
         usuario.desativar();
     }
 
-    // =====================================================
-    // ATIVAR
-    // =====================================================
+
 
     @Transactional
     public DadosDetalhamentoUsuario ativar(
@@ -178,9 +164,7 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // BUSCAR USUÁRIO
-    // =====================================================
+
 
     private Usuario buscarUsuario(
             Long id
@@ -195,9 +179,7 @@ public class UsuarioService {
                 );
     }
 
-    // =====================================================
-    // BUSCAR PERFIL
-    // =====================================================
+
 
     private Perfil buscarPerfilAtivo(
             Long perfilId
@@ -221,9 +203,7 @@ public class UsuarioService {
         return perfil;
     }
 
-    // =====================================================
-    // VALIDAR E-MAIL DUPLICADO
-    // =====================================================
+
 
     private void validarEmailDuplicado(
             String email
@@ -238,9 +218,7 @@ public class UsuarioService {
         }
     }
 
-    // =====================================================
-    // ATUALIZAR NOME
-    // =====================================================
+
 
     private void atualizarNome(
             Usuario usuario,
@@ -256,9 +234,7 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // ATUALIZAR E-MAIL
-    // =====================================================
+
 
     private void atualizarEmail(
             Usuario usuario,
@@ -288,9 +264,6 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // ATUALIZAR SENHA
-    // =====================================================
 
     private void atualizarSenha(
             Usuario usuario,
@@ -311,9 +284,6 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // ATUALIZAR PERFIL
-    // =====================================================
 
     private void atualizarPerfil(
             Usuario usuario,
@@ -333,9 +303,7 @@ public class UsuarioService {
         );
     }
 
-    // =====================================================
-    // ATUALIZAR STATUS
-    // =====================================================
+
 
     private void atualizarStatus(
             Usuario usuario,

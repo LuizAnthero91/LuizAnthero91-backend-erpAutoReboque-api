@@ -91,7 +91,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // Todo o restante exige autenticação
+
                         .anyRequest()
                         .authenticated()
                 )
