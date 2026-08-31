@@ -1,0 +1,23 @@
+services:
+  erp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: erpautoreboque-tora
+
+    network_mode: host
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_ADDRESS: 127.0.0.1
+      SERVER_PORT: 8080
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+
+    restart: unless-stopped
+
+    security_opt:
+      - no-new-privileges:true
