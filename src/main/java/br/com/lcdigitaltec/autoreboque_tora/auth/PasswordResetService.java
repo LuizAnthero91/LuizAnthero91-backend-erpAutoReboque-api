@@ -5,9 +5,9 @@ import br.com.lcdigitaltec.autoreboque_tora.domain.passwordreset.PasswordResetTo
 import br.com.lcdigitaltec.autoreboque_tora.domain.passwordreset.PasswordResetTokenRepository;
 import br.com.lcdigitaltec.autoreboque_tora.domain.usuario.Usuario;
 import br.com.lcdigitaltec.autoreboque_tora.domain.usuario.UsuarioRepository;
+import br.com.lcdigitaltec.autoreboque_tora.email.EmailService;
 import br.com.lcdigitaltec.autoreboque_tora.security.ResetTokenService;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,24 +24,20 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokenRepository;
     private final ResetTokenService resetTokenService;
     private final PasswordEncoder passwordEncoder;
-
-    private final boolean exposeToken;
+    private final EmailService emailService;
 
     public PasswordResetService(
             UsuarioRepository usuarioRepository,
             PasswordResetTokenRepository tokenRepository,
             ResetTokenService resetTokenService,
             PasswordEncoder passwordEncoder,
-            @Value("${app.password-reset.expose-token:false}")
-            boolean exposeToken
+            EmailService emailService
     ) {
-
         this.usuarioRepository = usuarioRepository;
         this.tokenRepository = tokenRepository;
         this.resetTokenService = resetTokenService;
         this.passwordEncoder = passwordEncoder;
-        this.exposeToken = exposeToken;
-
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -51,26 +47,27 @@ public class PasswordResetService {
 
         String mensagem =
                 "Se o email estiver cadastrado, "
-                + "as instruções de recuperação serão enviadas.";
+                        + "as instruções de recuperação serão enviadas.";
 
         var usuarioOptional =
                 usuarioRepository.findByEmail(email);
 
+
         if (usuarioOptional.isEmpty()) {
 
             return new EsqueciSenhaResponse(
-                    mensagem,
-                    null
+                    mensagem
             );
         }
 
         Usuario usuario =
                 usuarioOptional.get();
 
-        // Invalida solicitações anteriores
+
         tokenRepository.deleteByUsuarioId(
                 usuario.getId()
         );
+
 
         String token =
                 resetTokenService.gerarToken();
@@ -86,9 +83,7 @@ public class PasswordResetService {
                 new PasswordResetToken();
 
         reset.setUsuario(usuario);
-
         reset.setTokenHash(tokenHash);
-
         reset.setCriadoEm(agora);
 
         reset.setExpiraEm(
@@ -100,12 +95,16 @@ public class PasswordResetService {
 
         tokenRepository.save(reset);
 
+
+        emailService.enviarRecuperacaoSenha(
+                usuario,
+                token
+        );
+
         return new EsqueciSenhaResponse(
-                mensagem,
-                exposeToken ? token : null
+                mensagem
         );
     }
-
 
     @Transactional
     public void redefinirSenha(
@@ -121,6 +120,7 @@ public class PasswordResetService {
                     "As senhas não coincidem."
             );
         }
+
 
         String tokenHash =
                 resetTokenService.gerarHash(token);
@@ -140,8 +140,7 @@ public class PasswordResetService {
         Instant agora =
                 Instant.now();
 
-        if (reset.getExpiraEm()
-                .isBefore(agora)) {
+        if (reset.getExpiraEm().isBefore(agora)) {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -152,11 +151,13 @@ public class PasswordResetService {
         Usuario usuario =
                 reset.getUsuario();
 
+
         usuario.alterarSenha(
                 passwordEncoder.encode(
                         novaSenha
                 )
         );
+
 
         reset.setUtilizadoEm(agora);
 
