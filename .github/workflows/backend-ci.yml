@@ -52,3 +52,11 @@ jobs:
 
       - name: Executar build e testes
         run: ./mvnw --batch-mode clean package
+
+      - name: Salvar JAR como artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erp-autoreboque-api
+          path: target/*.jar
+          retention-days: 5
