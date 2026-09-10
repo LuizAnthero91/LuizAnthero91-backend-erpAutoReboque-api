@@ -10,6 +10,7 @@ on:
       - main
 
 jobs:
+
   build-test:
     name: Build e Testes
     runs-on: ubuntu-latest
@@ -37,6 +38,7 @@ jobs:
       TEST_JWT_SECRET: ${{ secrets.TEST_JWT_SECRET }}
 
     steps:
+
       - name: Baixar codigo
         uses: actions/checkout@v5
 
@@ -60,3 +62,48 @@ jobs:
           name: erp-autoreboque-api
           path: target/*.jar
           retention-days: 5
+
+
+
+  deploy-staging-vps:
+    name: Enviar JAR para VPS
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-test
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+
+      - name: Baixar JAR aprovado
+        uses: actions/download-artifact@v4
+        with:
+          name: erp-autoreboque-api
+          path: artifact
+
+      - name: Configurar chave SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Registrar VPS em known_hosts
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Enviar JAR para /tmp da VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          scp \
+            -P "$VPS_PORT" \
+            artifact/*.jar \
+            "$VPS_USER@$VPS_HOST:/tmp/erp-autoreboque-app.jar"
