@@ -10,6 +10,20 @@ spring:
 
   flyway:
     enabled: true
+
+  # SMTP fictício apenas para o contexto de testes
+  mail:
+    host: localhost
+    port: 2525
+    username: teste
+    password: teste
+
+app:
+  frontend-url: http://localhost:4200
+
+  mail:
+    from: teste@localhost
+
 jwt:
   secret: ${TEST_JWT_SECRET}
   expiration: 3600000
@@ -17,5 +31,6 @@ jwt:
 springdoc:
   api-docs:
     enabled: false
+
   swagger-ui:
     enabled: false
