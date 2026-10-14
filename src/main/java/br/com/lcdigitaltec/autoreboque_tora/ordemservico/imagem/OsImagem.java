@@ -29,12 +29,6 @@ public class OsImagem {
     private String storageKey;
 
     @Column(
-            nullable = false,
-            length = 1000
-    )
-    private String url;
-
-    @Column(
             name = "nome_original",
             length = 255
     )
@@ -63,14 +57,12 @@ public class OsImagem {
     public OsImagem(
             OrdemServico ordemServico,
             String storageKey,
-            String url,
             String nomeOriginal,
             String contentType,
             Long tamanhoBytes
     ) {
         this.ordemServico = ordemServico;
         this.storageKey = storageKey;
-        this.url = url;
         this.nomeOriginal = nomeOriginal;
         this.contentType = contentType;
         this.tamanhoBytes = tamanhoBytes;
@@ -87,10 +79,6 @@ public class OsImagem {
 
     public String getStorageKey() {
         return storageKey;
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public String getNomeOriginal() {

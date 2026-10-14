@@ -12,12 +12,13 @@ public record OsImagemResponse(
 ) {
 
     public static OsImagemResponse from(
-            OsImagem imagem
+            OsImagem imagem,
+            String urlTemporaria
     ) {
 
         return new OsImagemResponse(
                 imagem.getId(),
-                imagem.getUrl(),
+                urlTemporaria,
                 imagem.getNomeOriginal(),
                 imagem.getContentType(),
                 imagem.getTamanhoBytes(),

@@ -22,6 +22,9 @@ public class OsImagemService {
     private static final long MAX_FILE_SIZE =
             8L * 1024 * 1024;
 
+    private static final long MAX_IMAGENS_POR_OS =
+            10L;
+
     private static final Set<String> TIPOS_PERMITIDOS =
             Set.of(
                     "image/jpeg",
@@ -30,9 +33,7 @@ public class OsImagemService {
             );
 
     private final StorageService storageService;
-
     private final OsImagemRepository imagemRepository;
-
     private final OrdemServicoRepository ordemServicoRepository;
 
     public OsImagemService(
@@ -46,12 +47,13 @@ public class OsImagemService {
     }
 
     @Transactional
-    public OsImagem upload(
+    public OsImagemResponse upload(
             Long ordemServicoId,
             MultipartFile file
     ) {
 
         validarArquivo(file);
+        validarLimiteImagens(ordemServicoId);
 
         OrdemServico ordemServico =
                 ordemServicoRepository
@@ -78,45 +80,89 @@ public class OsImagemService {
                         + "/"
                         + nomeArquivo;
 
+        boolean uploadRealizado = false;
+
         try {
 
-            String url =
-                    storageService.upload(
-                            file.getInputStream(),
-                            file.getSize(),
-                            storageKey,
-                            file.getContentType()
-                    );
+            storageService.upload(
+                    file.getInputStream(),
+                    file.getSize(),
+                    storageKey,
+                    file.getContentType()
+            );
+
+            uploadRealizado = true;
 
             OsImagem imagem =
                     new OsImagem(
                             ordemServico,
                             storageKey,
-                            url,
                             file.getOriginalFilename(),
                             file.getContentType(),
                             file.getSize()
                     );
 
-            return imagemRepository.save(imagem);
+            OsImagem imagemSalva =
+                    imagemRepository.save(imagem);
+
+            String urlTemporaria =
+                    storageService.gerarUrlTemporaria(
+                            imagemSalva.getStorageKey()
+                    );
+
+            return OsImagemResponse.from(
+                    imagemSalva,
+                    urlTemporaria
+            );
 
         } catch (IOException e) {
+
+            if (uploadRealizado) {
+                storageService.delete(storageKey);
+            }
 
             throw new RuntimeException(
                     "Erro ao processar imagem",
                     e
             );
+
+        } catch (RuntimeException e) {
+
+            if (uploadRealizado) {
+                storageService.delete(storageKey);
+            }
+
+            throw e;
         }
     }
 
-    public List<OsImagem> listar(
+    public List<OsImagemResponse> listar(
             Long ordemServicoId
     ) {
 
+        if (!ordemServicoRepository.existsById(ordemServicoId)) {
+            throw new IllegalArgumentException(
+                    "Ordem de serviço não encontrada"
+            );
+        }
+
         return imagemRepository
-                .findByOrdemServicoId(
-                        ordemServicoId
-                );
+                .findByOrdemServicoId(ordemServicoId)
+                .stream()
+                .map(imagem -> {
+
+                    String urlTemporaria =
+                            storageService
+                                    .gerarUrlTemporaria(
+                                            imagem.getStorageKey()
+                                    );
+
+                    return OsImagemResponse.from(
+                            imagem,
+                            urlTemporaria
+                    );
+                })
+                .toList();
     }
 
     @Transactional
@@ -127,22 +173,15 @@ public class OsImagemService {
 
         OsImagem imagem =
                 imagemRepository
-                        .findById(imagemId)
+                        .findByIdAndOrdemServicoId(
+                                imagemId,
+                                ordemServicoId
+                        )
                         .orElseThrow(
                                 () -> new IllegalArgumentException(
-                                        "Imagem não encontrada"
+                                        "Imagem não encontrada para esta ordem de serviço"
                                 )
                         );
-
-        if (!imagem
-                .getOrdemServico()
-                .getId()
-                .equals(ordemServicoId)) {
-
-            throw new IllegalArgumentException(
-                    "Imagem não pertence a esta ordem de serviço"
-            );
-        }
 
         storageService.delete(
                 imagem.getStorageKey()
@@ -151,6 +190,24 @@ public class OsImagemService {
         imagemRepository.delete(
                 imagem
         );
+    }
+
+    private void validarLimiteImagens(
+            Long ordemServicoId
+    ) {
+
+        long quantidade =
+                imagemRepository
+                        .countByOrdemServicoId(
+                                ordemServicoId
+                        );
+
+        if (quantidade >= MAX_IMAGENS_POR_OS) {
+
+            throw new IllegalArgumentException(
+                    "Limite máximo de 10 imagens por ordem de serviço"
+            );
+        }
     }
 
     private void validarArquivo(

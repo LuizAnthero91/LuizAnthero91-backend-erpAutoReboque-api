@@ -59,7 +59,6 @@ backups/
 ### Uploads locais ###
 uploads/
 files/
-storage/
 
 ### Sistema operacional ###
 .DS_Store
