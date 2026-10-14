@@ -1,15 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/erp_autoreboque_test
-    username: erp_autoreboque_app
-    password: ${TEST_DB_PASSWORD}
+    url: jdbc:h2:mem:erp_autoreboque_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
+    open-in-view: false
 
   flyway:
-    enabled: true
+    enabled: false
 
   # SMTP fictício apenas para o contexto de testes
   mail:
@@ -25,7 +27,7 @@ app:
     from: teste@localhost
 
 jwt:
-  secret: ${TEST_JWT_SECRET}
+  secret: 0123456789012345678901234567890123456789012345678901234567890123
   expiration: 3600000
 
 springdoc:
@@ -34,3 +36,10 @@ springdoc:
 
   swagger-ui:
     enabled: false
+
+storage:
+  r2:
+    endpoint: http://localhost:9000
+    bucket: test-bucket
+    access-key: test-access-key
+    secret-key: test-secret-key
