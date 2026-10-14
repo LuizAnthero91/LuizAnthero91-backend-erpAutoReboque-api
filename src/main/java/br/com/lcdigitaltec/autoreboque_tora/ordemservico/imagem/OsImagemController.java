@@ -1,8 +1,4 @@
-package br.com.lcdigitaltec.autoreboque_tora.controller;
-
-import br.com.lcdigitaltec.autoreboque_tora.controller.dto.OsImagemResponse;
-import br.com.lcdigitaltec.autoreboque_tora.domain.ordemservico.imagem.OsImagem;
-import br.com.lcdigitaltec.autoreboque_tora.domain.ordemservico.imagem.OsImagemService;
+package br.com.lcdigitaltec.autoreboque_tora.ordemservico.imagem;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +77,7 @@ public class OsImagemController {
     ) {
 
         service.excluir(
+                ordemServicoId,
                 imagemId
         );
 

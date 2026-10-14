@@ -1,4 +1,11 @@
 package br.com.lcdigitaltec.autoreboque_tora.ordemservico.imagem;
 
-public interface OsImagemRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface OsImagemRepository
+        extends JpaRepository<OsImagem, Long> {
+
+    List<OsImagem> findByOrdemServicoId(Long ordemServicoId);
 }
