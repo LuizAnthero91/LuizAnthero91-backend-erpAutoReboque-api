@@ -70,8 +70,55 @@ jobs:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+
+
+      - name: Registrar VPS em known_hosts
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "Registrando chave SSH da VPS..."
+
+          ssh-keyscan \
+            -H \
+            -p "$VPS_PORT" \
+            "$VPS_HOST" \
+            > ~/.ssh/known_hosts
+
+          if [ ! -s ~/.ssh/known_hosts ]; then
+            echo "ERRO: known_hosts ficou vazio."
+            echo "Nao foi possivel obter a chave SSH da VPS."
+            exit 1
+          fi
+
+          chmod 600 ~/.ssh/known_hosts
+
+          echo "Quantidade de chaves registradas:"
+          wc -l ~/.ssh/known_hosts
+
+
+      - name: Testar conexao SSH
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          ssh \
+            -i ~/.ssh/id_rsa \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$VPS_PORT" \
+            "$VPS_USER@$VPS_HOST" \
+            "echo 'Conexao SSH com VPS realizada com sucesso'"
+
 
       - name: Atualizar e publicar backend Docker
         env:
@@ -79,7 +126,13 @@ jobs:
           VPS_PORT: ${{ secrets.VPS_PORT }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" << 'EOF'
+          ssh \
+            -i ~/.ssh/id_rsa \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$VPS_PORT" \
+            "$VPS_USER@$VPS_HOST" << 'EOF'
 
           set -e
 
@@ -95,39 +148,61 @@ jobs:
           echo "Commit em producao:"
           git log -1 --oneline
 
+
+          echo "=========================================="
+          echo "Validando permissao sudo para Docker"
+          echo "=========================================="
+
+          sudo -n docker ps > /dev/null
+
+          echo "Permissao sudo Docker OK"
+
+
           echo "=========================================="
           echo "Construindo nova imagem Docker"
           echo "=========================================="
 
-          sudo docker compose -f docker-compose.yml build erp
+          sudo -n docker compose \
+            -f docker-compose.yml \
+            build erp
+
 
           echo "=========================================="
           echo "Subindo novo container"
           echo "=========================================="
 
-          sudo docker compose -f docker-compose.yml up -d erp
+          sudo -n docker compose \
+            -f docker-compose.yml \
+            up -d erp
+
 
           echo "=========================================="
           echo "Validando container"
           echo "=========================================="
 
-          sudo docker compose -f docker-compose.yml ps
+          sudo -n docker compose \
+            -f docker-compose.yml \
+            ps
 
-          if ! sudo docker ps \
+
+          if ! sudo -n docker ps \
             --format '{{.Names}}' \
             | grep -q '^erpautoreboque-tora$'; then
 
-            echo "ERRO: container nao esta em execucao."
+            echo "=========================================="
+            echo "ERRO: container nao esta em execucao"
+            echo "=========================================="
 
-            sudo docker logs \
+            sudo -n docker logs \
               --tail 100 \
               erpautoreboque-tora || true
 
             exit 1
           fi
 
+
           echo "=========================================="
-          echo "Validando Spring Boot via HTTP"
+          echo "Aguardando inicializacao do Spring Boot"
           echo "=========================================="
 
           HEALTH_OK=false
@@ -150,6 +225,7 @@ jobs:
             sleep 5
           done
 
+
           if [ "$HEALTH_OK" != "true" ]; then
 
             echo "=========================================="
@@ -157,19 +233,30 @@ jobs:
             echo "=========================================="
 
             echo "Status Docker:"
-            sudo docker compose -f docker-compose.yml ps
 
-            echo "Ultimos logs:"
-            sudo docker logs \
-              --tail 100 \
+            sudo -n docker compose \
+              -f docker-compose.yml \
+              ps
+
+            echo "Ultimos logs do backend:"
+
+            sudo -n docker logs \
+              --tail 150 \
               erpautoreboque-tora || true
 
             exit 1
           fi
 
+
           echo "=========================================="
           echo "Spring Boot respondeu HTTP 401"
           echo "DEPLOY CONCLUIDO COM SUCESSO"
           echo "=========================================="
+
+          echo "Ultimas linhas do backend:"
+
+          sudo -n docker logs \
+            --tail 30 \
+            erpautoreboque-tora || true
 
           EOF
