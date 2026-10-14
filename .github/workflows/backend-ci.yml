@@ -150,19 +150,10 @@ jobs:
 
 
           echo "=========================================="
-          echo "Validando permissao sudo para Docker"
-          echo "=========================================="
-
-          sudo -n docker ps > /dev/null
-
-          echo "Permissao sudo Docker OK"
-
-
-          echo "=========================================="
           echo "Construindo nova imagem Docker"
           echo "=========================================="
 
-          sudo -n docker compose \
+          docker compose \
             -f docker-compose.yml \
             build erp
 
@@ -171,7 +162,7 @@ jobs:
           echo "Subindo novo container"
           echo "=========================================="
 
-          sudo -n docker compose \
+          docker compose \
             -f docker-compose.yml \
             up -d erp
 
@@ -180,12 +171,12 @@ jobs:
           echo "Validando container"
           echo "=========================================="
 
-          sudo -n docker compose \
+          docker compose \
             -f docker-compose.yml \
             ps
 
 
-          if ! sudo -n docker ps \
+          if ! docker ps \
             --format '{{.Names}}' \
             | grep -q '^erpautoreboque-tora$'; then
 
@@ -193,7 +184,7 @@ jobs:
             echo "ERRO: container nao esta em execucao"
             echo "=========================================="
 
-            sudo -n docker logs \
+            docker logs \
               --tail 100 \
               erpautoreboque-tora || true
 
@@ -234,13 +225,13 @@ jobs:
 
             echo "Status Docker:"
 
-            sudo -n docker compose \
+            docker compose \
               -f docker-compose.yml \
               ps
 
             echo "Ultimos logs do backend:"
 
-            sudo -n docker logs \
+            docker logs \
               --tail 150 \
               erpautoreboque-tora || true
 
@@ -255,7 +246,7 @@ jobs:
 
           echo "Ultimas linhas do backend:"
 
-          sudo -n docker logs \
+          docker logs \
             --tail 30 \
             erpautoreboque-tora || true
 
