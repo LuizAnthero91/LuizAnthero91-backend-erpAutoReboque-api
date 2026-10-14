@@ -73,13 +73,6 @@ jobs:
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Registrar VPS em known_hosts
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
-        run: |
-          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts
-
       - name: Atualizar e publicar backend Docker
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -106,27 +99,27 @@ jobs:
           echo "Construindo nova imagem Docker"
           echo "=========================================="
 
-          docker compose -f docker-compose.yml build erp
+          sudo docker compose -f docker-compose.yml build erp
 
           echo "=========================================="
           echo "Subindo novo container"
           echo "=========================================="
 
-          docker compose -f docker-compose.yml up -d erp
+          sudo docker compose -f docker-compose.yml up -d erp
 
           echo "=========================================="
           echo "Validando container"
           echo "=========================================="
 
-          docker compose -f docker-compose.yml ps
+          sudo docker compose -f docker-compose.yml ps
 
-          if ! docker ps \
+          if ! sudo docker ps \
             --format '{{.Names}}' \
             | grep -q '^erpautoreboque-tora$'; then
 
             echo "ERRO: container nao esta em execucao."
 
-            docker logs \
+            sudo docker logs \
               --tail 100 \
               erpautoreboque-tora || true
 
@@ -164,10 +157,10 @@ jobs:
             echo "=========================================="
 
             echo "Status Docker:"
-            docker compose -f docker-compose.yml ps
+            sudo docker compose -f docker-compose.yml ps
 
             echo "Ultimos logs:"
-            docker logs \
+            sudo docker logs \
               --tail 100 \
               erpautoreboque-tora || true
 
